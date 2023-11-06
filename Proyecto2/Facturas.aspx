@@ -26,8 +26,8 @@
         </asp:DropDownList>
         <asp:Label ID="nombreLabel" runat="server" Text="Nombre: "></asp:Label>
         <asp:TextBox ID="filtrarNombre" runat="server" type="text"></asp:TextBox>
-        <asp:Button ID="filtrar" runat="server" Text="Filtrar" OnClick="btnFiltrar"/>
-        <asp:Button ID="restablecer" runat="server" Text="Restablecer" OnClick="Page_Reload" />
+        <asp:Button ID="filtrar" runat="server" Text="Filtrar"/>
+        <asp:Button ID="restablecer" runat="server" Text="Restablecer"  />
         <div>
             <asp:GridView ID="informacion" runat="server" AutoGenerateColumns="False"
                         AutoGenerateEditButton="True" 

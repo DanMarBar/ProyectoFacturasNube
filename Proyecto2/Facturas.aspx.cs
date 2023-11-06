@@ -8,29 +8,35 @@ using System.Web.UI.WebControls;
 using System.Data;
 using System.Configuration;
 using System.Data.SqlClient;
+using ClickHouse.Ado;
+
 
 public partial class Facturas : System.Web.UI.Page
 {
-    static String cs = ConfigurationManager.ConnectionStrings["conexion"].ConnectionString;
-    static SqlConnection con = new SqlConnection(cs);
+    static String cs = "Host = ProjectDataBase2; Port=8123; database = default; User=default; Password=BJfMSfgoAOj4.;";
     public DataTable dt = new DataTable();
     public DataView dv = new DataView();
-
     /**
      * Pre:---
      * Post: Cuando se carga la página se lee los datos de fichero .xml y meter a GridView.
      * GetDataTableFromXml() para lee fichero .xml y se guarda en un DataTable.
      *
      */
+
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!Page.IsPostBack)
         {
-            string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-            dt = GetDataFromBBDD(xmlFilePath);
-            informacion.DataSource = dt;
+            ClickHouseConnection connection = new ClickHouseConnection(cs);
+            connection.Open();
+
+            ClickHouseCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT * FROM Facturas";
+            ClickHouseDataReader reader = (ClickHouseDataReader)cmd.ExecuteReader();
+            DataTable dataTable = new DataTable();
+            dataTable.Load(reader);
+            informacion.DataSource = dataTable;
             informacion.DataBind();
-            Session["TaskTable"] = dt;
         }
     }
     /**
@@ -38,15 +44,14 @@ public partial class Facturas : System.Web.UI.Page
      * Post: Cuando click a botón de restablecer se vacia los filtros y GridView devolver a su estado original.
      *
      */
-    protected void Page_Reload(object sender, EventArgs e)
-    {
-        string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-        dt = GetDataFromBBDD(xmlFilePath);
-        listaEstados.ClearSelection();
-        filtrarNombre.Text = "";
-        informacion.DataSource = dt;
-        informacion.DataBind();
-    }
+    //protected void Page_Reload(object sender, EventArgs e)
+    //{
+    //    SqlDataAdapter da = new SqlDataAdapter("select * from Facturas", con);
+    //    da.Fill(dt);
+    //    informacion.DataSource = dt;
+    //    informacion.DataBind();
+    //    Session["TaskTable"] = dt;
+    //}
 
     /**
      * Pre:---
@@ -54,51 +59,51 @@ public partial class Facturas : System.Web.UI.Page
      * filtrar por AplicarFiltros() y meter a GridView.
      *
      */
-    protected void btnFiltrar(object sender, EventArgs e)
-    {
-        string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-        dt = GetDataFromBBDD(xmlFilePath);
-        AplicarFiltro();
-        informacion.DataSource = dt;
-        informacion.DataBind();
-    }
+    //protected void btnFiltrar(object sender, EventArgs e)
+    //{
+    //    string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
+    //    dt = GetDataFromBBDD(xmlFilePath);
+    //    AplicarFiltro();
+    //    informacion.DataSource = dt;
+    //    informacion.DataBind();
+    //}
 
     /**
      * Pre:---
      * Post: Leer los datos que tiene en el fichero xml y guardar en una DataTable.
      *
      */
-    private DataTable GetDataFromBBDD(string xmlFilePath)
-    {
-        DataTable dataTable = new DataTable();
-        try
-        {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(xmlFilePath);
-            XmlNode firstNode = xmlDoc.DocumentElement.FirstChild;
-            foreach (XmlNode node in firstNode.ChildNodes)
-            {
-                dataTable.Columns.Add(node.Name, typeof(string));
-            }
-            foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
-            {
-                DataRow row = dataTable.NewRow();
-                foreach (XmlNode childNode in node.ChildNodes)
-                {
-                    if (!dataTable.Columns.Contains(childNode.Name))
-                        dataTable.Columns.Add(childNode.Name, typeof(string));
-                    row[childNode.Name] = childNode.InnerText;
-                }
-                dataTable.Rows.Add(row);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Ocurrió un error al leer el archivo XML: " + ex.Message);
-        }
+    //private DataTable GetDataFromBBDD(string xmlFilePath)
+    //{
+    //    DataTable dataTable = new DataTable();
+    //    try
+    //    {
+    //        XmlDocument xmlDoc = new XmlDocument();
+    //        xmlDoc.Load(xmlFilePath);
+    //        XmlNode firstNode = xmlDoc.DocumentElement.FirstChild;
+    //        foreach (XmlNode node in firstNode.ChildNodes)
+    //        {
+    //            dataTable.Columns.Add(node.Name, typeof(string));
+    //        }
+    //        foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
+    //        {
+    //            DataRow row = dataTable.NewRow();
+    //            foreach (XmlNode childNode in node.ChildNodes)
+    //            {
+    //                if (!dataTable.Columns.Contains(childNode.Name))
+    //                    dataTable.Columns.Add(childNode.Name, typeof(string));
+    //                row[childNode.Name] = childNode.InnerText;
+    //            }
+    //            dataTable.Rows.Add(row);
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Console.WriteLine("Ocurrió un error al leer el archivo XML: " + ex.Message);
+    //    }
 
-        return dataTable;
-    }
+    //    return dataTable;
+    //}
 
     /**
      * Pre:---
