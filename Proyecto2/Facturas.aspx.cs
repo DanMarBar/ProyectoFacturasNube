@@ -13,7 +13,7 @@ using ClickHouse.Ado;
 
 public partial class Facturas : System.Web.UI.Page
 {
-    static String cs = "Host = ProjectDataBase2; Port=8123; database = default; User=default; Password=BJfMSfgoAOj4.;";
+    static string cs = "Compress=True;CheckCompressedHash=False;Compressor=lz4;Host=bhm1puaaay.eu-central-1.aws.clickhouse.cloud;Port=9440;Database=default;User=default;Password=Cz3SJ_GRbKt3X;";
     public DataTable dt = new DataTable();
     public DataView dv = new DataView();
     /**
@@ -25,18 +25,31 @@ public partial class Facturas : System.Web.UI.Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (!Page.IsPostBack)
+        if (!IsPostBack)
         {
-            ClickHouseConnection connection = new ClickHouseConnection(cs);
-            connection.Open();
+            using (var connection = new ClickHouseConnection(cs))
+            {
+                try
+                {
+                    connection.Open();
 
-            ClickHouseCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Facturas";
-            ClickHouseDataReader reader = (ClickHouseDataReader)cmd.ExecuteReader();
-            DataTable dataTable = new DataTable();
-            dataTable.Load(reader);
-            informacion.DataSource = dataTable;
-            informacion.DataBind();
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT * FROM Facturas";
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            DataTable dataTable = new DataTable();
+                            dataTable.Load(reader);
+                            informacion.DataSource = dataTable;
+                            informacion.DataBind();
+                        }
+                    }
+                }
+                catch (Exception ex) { 
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
     }
     /**
