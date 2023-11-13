@@ -26,37 +26,42 @@
         </asp:DropDownList>
         <asp:Label ID="nombreLabel" runat="server" Text="Nombre: "></asp:Label>
         <asp:TextBox ID="filtrarNombre" runat="server" type="text"></asp:TextBox>
-        <asp:Button ID="filtrar" runat="server" Text="Filtrar" OnClick="btnFiltrar"/>
-        <asp:Button ID="restablecer" runat="server" Text="Restablecer" OnClick="Page_Reload" />
+        <asp:Button ID="filtrar" runat="server" Text="Filtrar"/>
+        <asp:Button ID="restablecer" runat="server" Text="Restablecer"  />
         <div>
             <asp:GridView ID="informacion" runat="server" AutoGenerateColumns="False"
                         AutoGenerateEditButton="True" 
                         OnRowEditing="informacion_RowEditing"         
                         OnRowCancelingEdit="informacion_RowCancelingEdit" 
                         OnRowUpdating="informacion_RowUpdating"
-                        OnPageIndexChanging="informacion_PageIndexChanging">
-                <HeaderStyle CssClass="header-row" />
+                        OnPageIndexChanging="informacion_PageIndexChanging" CellPadding="4" ForeColor="#333333" GridLines="None" >
+                <AlternatingRowStyle BackColor="White" />
                 <Columns>
-                    <asp:BoundField DataField="numeroFactura" HeaderText="Nº Factura" SortExpression="numeroFactura"/>
-                    <asp:BoundField DataField="fechaFactura" HeaderText="Fecha" SortExpression="fechaFactura" />
-                    <asp:BoundField DataField="nombre" HeaderText="Nombre Cliente" SortExpression="nombre" />
-                    <asp:BoundField DataField="apellidos" HeaderText="Apellidos de Cliente" SortExpression="apellidos" />
-                    <asp:BoundField DataField="servicio" HeaderText="Servicio" SortExpression="servicio" />
-                    <asp:BoundField DataField="CIFCliente" HeaderText="CIFCliente" SortExpression="CIFCliente" />
-                    <asp:BoundField DataField="importe" HeaderText="Importe" SortExpression="importe" />
-                    <asp:BoundField DataField="importeIVA" HeaderText="IVA" SortExpression="importeIVA" />
-                    <asp:BoundField DataField="moneda" HeaderText="Moneda" SortExpression="moneda" />
-                    <asp:BoundField DataField="estado" HeaderText="Estado" SortExpression="estado" />
-                    <asp:BoundField DataField="fechaCobro" HeaderText="Fecha de Cobro" SortExpression="fechaCobro" />
-                    <asp:TemplateField HeaderText="Edición">
-                        <ItemTemplate>
-                            <asp:LinkButton ID="lnkEdit" runat="server" CommandName="Edit" Text="Editar" />
-                        </ItemTemplate>
-                        <EditItemTemplate>
-                            <asp:TextBox ID="txtEditNombre" runat="server" Text='<%# Bind("nombre") %>' />
-                        </EditItemTemplate>
-                    </asp:TemplateField>
+                    <asp:BoundField DataField="numeroFactura" HeaderText="Cod. Factura" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="fechaFactura" HeaderText="Fecha Factura" DataFormatString="{0:dd/MM/yyyy}"><ItemStyle HorizontalAlign="center" /> </asp:BoundField>
+                    <asp:BoundField DataField="nombre" HeaderText="Nombre de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="apellidos" HeaderText="Apellidos de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="servicio" HeaderText="Servicio" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="CIFCliente" HeaderText="CIF de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="direccion" HeaderText="Direccion" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="ciudad" HeaderText="Ciudad" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="codPostal" HeaderText="Cod. Postal" ><ItemStyle HorizontalAlign="right" /> </asp:BoundField>
+                    <asp:BoundField DataField="importe" HeaderText="Importe de Factura" ><ItemStyle HorizontalAlign="right" /> </asp:BoundField>
+                    <asp:BoundField DataField="importeIVA" HeaderText="ImporteIVA de Factura" ><ItemStyle HorizontalAlign="right" /> </asp:BoundField>
+                    <asp:BoundField DataField="moneda" HeaderText="Moneda" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="estado" HeaderText="Estado de Factura" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:BoundField DataField="fechaCobro" HeaderText="Fecha cobro de Factura" DataFormatString="{0:dd/MM/yyyy}" ><ItemStyle HorizontalAlign="center" /> </asp:BoundField>
                 </Columns>
+                <EditRowStyle BackColor="#2461BF" />
+                <FooterStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
+                <HeaderStyle CssClass="header-row" BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#2461BF" ForeColor="White" HorizontalAlign="Center" />
+                <RowStyle BackColor="#EFF3FB" />
+                <SelectedRowStyle BackColor="#D1DDF1" Font-Bold="True" ForeColor="#333333" />
+                <SortedAscendingCellStyle BackColor="#F5F7FB" />
+                <SortedAscendingHeaderStyle BackColor="#6D95E1" />
+                <SortedDescendingCellStyle BackColor="#E9EBEF" />
+                <SortedDescendingHeaderStyle BackColor="#4870BE" />
             </asp:GridView>
             <asp:Button ID="commit" runat="server" OnClick="btnCommit" Text="Commit a BBDD"/>
         </div>

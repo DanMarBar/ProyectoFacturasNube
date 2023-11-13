@@ -8,29 +8,29 @@ using System.Web.UI.WebControls;
 using System.Data;
 using System.Configuration;
 using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 public partial class Facturas : System.Web.UI.Page
 {
     static String cs = ConfigurationManager.ConnectionStrings["conexion"].ConnectionString;
-    static SqlConnection con = new SqlConnection(cs);
     public DataTable dt = new DataTable();
     public DataView dv = new DataView();
-
     /**
      * Pre:---
      * Post: Cuando se carga la página se lee los datos de fichero .xml y meter a GridView.
      * GetDataTableFromXml() para lee fichero .xml y se guarda en un DataTable.
      *
      */
+
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!Page.IsPostBack)
         {
-            string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-            dt = GetDataFromBBDD(xmlFilePath);
+            MySqlConnection con = new MySqlConnection(cs);
+            MySqlDataAdapter cmd = new MySqlDataAdapter("SELECT * FROM facturas",con);
+            cmd.Fill(dt);
             informacion.DataSource = dt;
             informacion.DataBind();
-            Session["TaskTable"] = dt;
         }
     }
     /**
@@ -38,15 +38,14 @@ public partial class Facturas : System.Web.UI.Page
      * Post: Cuando click a botón de restablecer se vacia los filtros y GridView devolver a su estado original.
      *
      */
-    protected void Page_Reload(object sender, EventArgs e)
-    {
-        string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-        dt = GetDataFromBBDD(xmlFilePath);
-        listaEstados.ClearSelection();
-        filtrarNombre.Text = "";
-        informacion.DataSource = dt;
-        informacion.DataBind();
-    }
+    //protected void Page_Reload(object sender, EventArgs e)
+    //{
+    //    SqlDataAdapter da = new SqlDataAdapter("select * from Facturas", con);
+    //    da.Fill(dt);
+    //    informacion.DataSource = dt;
+    //    informacion.DataBind();
+    //    Session["TaskTable"] = dt;
+    //}
 
     /**
      * Pre:---
@@ -54,51 +53,51 @@ public partial class Facturas : System.Web.UI.Page
      * filtrar por AplicarFiltros() y meter a GridView.
      *
      */
-    protected void btnFiltrar(object sender, EventArgs e)
-    {
-        string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-        dt = GetDataFromBBDD(xmlFilePath);
-        AplicarFiltro();
-        informacion.DataSource = dt;
-        informacion.DataBind();
-    }
+    //protected void btnFiltrar(object sender, EventArgs e)
+    //{
+    //    string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
+    //    dt = GetDataFromBBDD(xmlFilePath);
+    //    AplicarFiltro();
+    //    informacion.DataSource = dt;
+    //    informacion.DataBind();
+    //}
 
     /**
      * Pre:---
      * Post: Leer los datos que tiene en el fichero xml y guardar en una DataTable.
      *
      */
-    private DataTable GetDataFromBBDD(string xmlFilePath)
-    {
-        DataTable dataTable = new DataTable();
-        try
-        {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(xmlFilePath);
-            XmlNode firstNode = xmlDoc.DocumentElement.FirstChild;
-            foreach (XmlNode node in firstNode.ChildNodes)
-            {
-                dataTable.Columns.Add(node.Name, typeof(string));
-            }
-            foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
-            {
-                DataRow row = dataTable.NewRow();
-                foreach (XmlNode childNode in node.ChildNodes)
-                {
-                    if (!dataTable.Columns.Contains(childNode.Name))
-                        dataTable.Columns.Add(childNode.Name, typeof(string));
-                    row[childNode.Name] = childNode.InnerText;
-                }
-                dataTable.Rows.Add(row);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Ocurrió un error al leer el archivo XML: " + ex.Message);
-        }
+    //private DataTable GetDataFromBBDD(string xmlFilePath)
+    //{
+    //    DataTable dataTable = new DataTable();
+    //    try
+    //    {
+    //        XmlDocument xmlDoc = new XmlDocument();
+    //        xmlDoc.Load(xmlFilePath);
+    //        XmlNode firstNode = xmlDoc.DocumentElement.FirstChild;
+    //        foreach (XmlNode node in firstNode.ChildNodes)
+    //        {
+    //            dataTable.Columns.Add(node.Name, typeof(string));
+    //        }
+    //        foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
+    //        {
+    //            DataRow row = dataTable.NewRow();
+    //            foreach (XmlNode childNode in node.ChildNodes)
+    //            {
+    //                if (!dataTable.Columns.Contains(childNode.Name))
+    //                    dataTable.Columns.Add(childNode.Name, typeof(string));
+    //                row[childNode.Name] = childNode.InnerText;
+    //            }
+    //            dataTable.Rows.Add(row);
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Console.WriteLine("Ocurrió un error al leer el archivo XML: " + ex.Message);
+    //    }
 
-        return dataTable;
-    }
+    //    return dataTable;
+    //}
 
     /**
      * Pre:---
@@ -158,32 +157,24 @@ public partial class Facturas : System.Web.UI.Page
     protected void informacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
     {
         informacion.PageIndex = e.NewPageIndex;
-        //Bind data to the GridView control.
         BindData();
     }
 
     protected void informacion_RowEditing(object sender, GridViewEditEventArgs e)
     {
-        //Set the edit index.
         informacion.EditIndex = e.NewEditIndex;
-        //Bind data to the GridView control.
         BindData();
     }
 
     protected void informacion_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
     {
-        //Reset the edit index.
         informacion.EditIndex = -1;
-        //Bind data to the GridView control.
         BindData();
     }
 
     protected void informacion_RowUpdating(object sender, GridViewUpdateEventArgs e)
     {
-        //Retrieve the table from the session object.
         DataTable dt = (DataTable)Session["TaskTable"];
-
-        //Update the values.
         GridViewRow row = informacion.Rows[e.RowIndex];
         dt.Rows[row.DataItemIndex]["importe"] = ((TextBox)(row.Cells[7].Controls[0])).Text;
         dt.Rows[row.DataItemIndex]["apellidos"] = ((TextBox)(row.Cells[4].Controls[0])).Text;
