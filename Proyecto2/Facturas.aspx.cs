@@ -13,6 +13,7 @@ using MySql.Data.MySqlClient;
 public partial class Facturas : System.Web.UI.Page
 {
     static String cs = ConfigurationManager.ConnectionStrings["conexion"].ConnectionString;
+
     public DataTable dt = new DataTable();
     public DataView dv = new DataView();
     /**
@@ -24,13 +25,14 @@ public partial class Facturas : System.Web.UI.Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (!Page.IsPostBack)
+        if (!IsPostBack)
         {
             MySqlConnection con = new MySqlConnection(cs);
             MySqlDataAdapter cmd = new MySqlDataAdapter("SELECT * FROM facturas",con);
             cmd.Fill(dt);
             informacion.DataSource = dt;
             informacion.DataBind();
+
         }
     }
     /**
