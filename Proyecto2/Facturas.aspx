@@ -27,14 +27,13 @@
         <asp:Label ID="nombreLabel" runat="server" Text="Nombre: "></asp:Label>
         <asp:TextBox ID="filtrarNombre" runat="server" type="text"></asp:TextBox>
         <asp:Button ID="filtrar" runat="server" Text="Filtrar"/>
-        <asp:Button ID="restablecer" runat="server" Text="Restablecer"  />
+        <asp:Button ID="restablecer" runat="server" Text="Restablecer" OnClick="Reload_Table"  />
         <div>
             <asp:GridView ID="informacion" runat="server" AutoGenerateColumns="False"
-                        AutoGenerateEditButton="True" 
                         OnRowEditing="informacion_RowEditing"         
                         OnRowCancelingEdit="informacion_RowCancelingEdit" 
                         OnRowUpdating="informacion_RowUpdating"
-                        OnPageIndexChanging="informacion_PageIndexChanging" CellPadding="4" ForeColor="#333333" GridLines="None" >
+                        >
                 <AlternatingRowStyle BackColor="White" />
                 <Columns>
                     <asp:BoundField DataField="numeroFactura" HeaderText="Cod. Factura" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
@@ -51,6 +50,7 @@
                     <asp:BoundField DataField="moneda" HeaderText="Moneda" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
                     <asp:BoundField DataField="estado" HeaderText="Estado de Factura" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
                     <asp:BoundField DataField="fechaCobro" HeaderText="Fecha cobro de Factura" DataFormatString="{0:dd/MM/yyyy}" ><ItemStyle HorizontalAlign="center" /> </asp:BoundField>
+                    <asp:CommandField ShowEditButton="True"/>                
                 </Columns>
                 <EditRowStyle BackColor="#2461BF" />
                 <FooterStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />

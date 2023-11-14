@@ -12,10 +12,33 @@ using MySql.Data.MySqlClient;
 
 public partial class Facturas : System.Web.UI.Page
 {
-    static String cs = ConfigurationManager.ConnectionStrings["conexion"].ConnectionString;
+    static String cs = ConfigurationManager.ConnectionStrings["cloud"].ConnectionString;
+    static SqlConnection con = new SqlConnection(cs);
+    static public DataTable dt = new DataTable();
+    static public DataView dv = new DataView();
+    public static MySqlConnectionStringBuilder NewMysqlTCPConnectionString()
+    {
+        // Equivalent connection string:
+        // "Uid=<DB_USER>;Pwd=<DB_PASS>;Host=<INSTANCE_HOST>;Database=<DB_NAME>;"
+        var connectionString = new MySqlConnectionStringBuilder()
+        {
+            // Note: Saving credentials in environment variables is convenient, but not
+            // secure - consider a more secure solution such as
+            // Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+            // keep secrets safe.
+            Server = Environment.GetEnvironmentVariable("127.0.0.1"),   // e.g. '127.0.0.1'
+                                                                            // Set Host to 'cloudsql' when deploying to App Engine Flexible environment
+            UserID = Environment.GetEnvironmentVariable("projectfactura"),   // e.g. 'my-db-user'
+            Password = Environment.GetEnvironmentVariable("{:oZ&gt;=c81xgH^}4_"), // e.g. 'my-db-password'
+            Database = Environment.GetEnvironmentVariable("BBDDCloud"), // e.g. 'my-database'
 
-    public DataTable dt = new DataTable();
-    public DataView dv = new DataView();
+            // The Cloud SQL proxy provides encryption between the proxy and instance.
+            SslMode = MySqlSslMode.Disabled,
+        };
+        connectionString.Pooling = true;
+        // Specify additional properties here.
+        return connectionString;
+    }
     /**
      * Pre:---
      * Post: Cuando se carga la página se lee los datos de fichero .xml y meter a GridView.
@@ -27,27 +50,23 @@ public partial class Facturas : System.Web.UI.Page
     {
         if (!IsPostBack)
         {
-            MySqlConnection con = new MySqlConnection(cs);
-            MySqlDataAdapter cmd = new MySqlDataAdapter("SELECT * FROM facturas",con);
-            cmd.Fill(dt);
-            informacion.DataSource = dt;
-            informacion.DataBind();
-
+            SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
+            da.Fill(dt);
+            BindData();
         }
     }
+
     /**
-     * Pre:---
-     * Post: Cuando click a botón de restablecer se vacia los filtros y GridView devolver a su estado original.
-     *
-     */
-    //protected void Page_Reload(object sender, EventArgs e)
-    //{
-    //    SqlDataAdapter da = new SqlDataAdapter("select * from Facturas", con);
-    //    da.Fill(dt);
-    //    informacion.DataSource = dt;
-    //    informacion.DataBind();
-    //    Session["TaskTable"] = dt;
-    //}
+* Pre:---
+* Post: Cuando click a botón de restablecer se vacia los filtros y GridView devolver a su estado original.
+*
+*/
+    protected void Reload_Table(object sender, EventArgs e)
+    {
+        SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
+        da.Fill(dt);
+        BindData();
+    }
 
     /**
      * Pre:---
@@ -62,43 +81,6 @@ public partial class Facturas : System.Web.UI.Page
     //    AplicarFiltro();
     //    informacion.DataSource = dt;
     //    informacion.DataBind();
-    //}
-
-    /**
-     * Pre:---
-     * Post: Leer los datos que tiene en el fichero xml y guardar en una DataTable.
-     *
-     */
-    //private DataTable GetDataFromBBDD(string xmlFilePath)
-    //{
-    //    DataTable dataTable = new DataTable();
-    //    try
-    //    {
-    //        XmlDocument xmlDoc = new XmlDocument();
-    //        xmlDoc.Load(xmlFilePath);
-    //        XmlNode firstNode = xmlDoc.DocumentElement.FirstChild;
-    //        foreach (XmlNode node in firstNode.ChildNodes)
-    //        {
-    //            dataTable.Columns.Add(node.Name, typeof(string));
-    //        }
-    //        foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
-    //        {
-    //            DataRow row = dataTable.NewRow();
-    //            foreach (XmlNode childNode in node.ChildNodes)
-    //            {
-    //                if (!dataTable.Columns.Contains(childNode.Name))
-    //                    dataTable.Columns.Add(childNode.Name, typeof(string));
-    //                row[childNode.Name] = childNode.InnerText;
-    //            }
-    //            dataTable.Rows.Add(row);
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Console.WriteLine("Ocurrió un error al leer el archivo XML: " + ex.Message);
-    //    }
-
-    //    return dataTable;
     //}
 
     /**
@@ -139,27 +121,6 @@ public partial class Facturas : System.Web.UI.Page
      */
     protected void btnCommit(object sender, EventArgs e)
     {
-        Response.Clear();
-        Response.Buffer = true;
-        Response.AddHeader("content-disposition", "attachment;filename=exported_data.xls");
-        Response.Charset = "";
-        Response.ContentType = "application/vnd.ms-excel";
-        StringWriter sw = new StringWriter();
-        HtmlTextWriter hw = new HtmlTextWriter(sw);
-        AplicarFiltro();
-        GridView gvExport = new GridView();
-        gvExport.DataSource = dt;
-        gvExport.DataBind();
-        gvExport.RenderControl(hw);
-        Response.Output.Write(sw.ToString());
-        Response.Flush();
-        Response.End();
-    }
-
-    protected void informacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
-    {
-        informacion.PageIndex = e.NewPageIndex;
-        BindData();
     }
 
     protected void informacion_RowEditing(object sender, GridViewEditEventArgs e)
@@ -176,22 +137,21 @@ public partial class Facturas : System.Web.UI.Page
 
     protected void informacion_RowUpdating(object sender, GridViewUpdateEventArgs e)
     {
-        DataTable dt = (DataTable)Session["TaskTable"];
-        GridViewRow row = informacion.Rows[e.RowIndex];
-        dt.Rows[row.DataItemIndex]["importe"] = ((TextBox)(row.Cells[7].Controls[0])).Text;
-        dt.Rows[row.DataItemIndex]["apellidos"] = ((TextBox)(row.Cells[4].Controls[0])).Text;
-        dt.Rows[row.DataItemIndex]["nombre"] = ((TextBox)(row.Cells[3].Controls[0])).Text;
-
-        //Reset the edit index.
+        SqlDataAdapter da = new SqlDataAdapter((string)ViewState["update"], con);
+        SqlCommandBuilder db = new SqlCommandBuilder(da);
+        DataSet ds = (DataSet)ViewState["dataset"];
+        if (ds.Tables["facturas"].Rows.Count > 0) {
+            GridViewRow row = informacion.Rows[e.RowIndex];
+            DataRow dr = ds.Tables["facturas"].Rows[0];
+            dr["importe"] = ((TextBox)(row.Cells[10].Controls[0])).Text;
+        }
         informacion.EditIndex = -1;
-
-        //Bind data to the GridView control.
         BindData();
     }
 
     private void BindData()
     {
-        informacion.DataSource = Session["TaskTable"];
+        informacion.DataSource = dt;
         informacion.DataBind();
     }
 }
