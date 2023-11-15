@@ -15,30 +15,7 @@ public partial class Facturas : System.Web.UI.Page
     static String cs = ConfigurationManager.ConnectionStrings["cloud"].ConnectionString;
     static SqlConnection con = new SqlConnection(cs);
     static public DataTable dt = new DataTable();
-    static public DataView dv = new DataView();
-    public static MySqlConnectionStringBuilder NewMysqlTCPConnectionString()
-    {
-        // Equivalent connection string:
-        // "Uid=<DB_USER>;Pwd=<DB_PASS>;Host=<INSTANCE_HOST>;Database=<DB_NAME>;"
-        var connectionString = new MySqlConnectionStringBuilder()
-        {
-            // Note: Saving credentials in environment variables is convenient, but not
-            // secure - consider a more secure solution such as
-            // Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-            // keep secrets safe.
-            Server = Environment.GetEnvironmentVariable("127.0.0.1"),   // e.g. '127.0.0.1'
-                                                                            // Set Host to 'cloudsql' when deploying to App Engine Flexible environment
-            UserID = Environment.GetEnvironmentVariable("projectfactura"),   // e.g. 'my-db-user'
-            Password = Environment.GetEnvironmentVariable("{:oZ&gt;=c81xgH^}4_"), // e.g. 'my-db-password'
-            Database = Environment.GetEnvironmentVariable("BBDDCloud"), // e.g. 'my-database'
-
-            // The Cloud SQL proxy provides encryption between the proxy and instance.
-            SslMode = MySqlSslMode.Disabled,
-        };
-        connectionString.Pooling = true;
-        // Specify additional properties here.
-        return connectionString;
-    }
+    
     /**
      * Pre:---
      * Post: Cuando se carga la página se lee los datos de fichero .xml y meter a GridView.
@@ -52,7 +29,7 @@ public partial class Facturas : System.Web.UI.Page
         {
             SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
             da.Fill(dt);
-            BindData();
+            BindData(dt);
         }
     }
 
@@ -65,7 +42,7 @@ public partial class Facturas : System.Web.UI.Page
     {
         SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
         da.Fill(dt);
-        BindData();
+        BindData(dt);
     }
 
     /**
@@ -74,44 +51,43 @@ public partial class Facturas : System.Web.UI.Page
      * filtrar por AplicarFiltros() y meter a GridView.
      *
      */
-    //protected void btnFiltrar(object sender, EventArgs e)
-    //{
-    //    string xmlFilePath = Server.MapPath("~/Datos/Facturas.xml");
-    //    dt = GetDataFromBBDD(xmlFilePath);
-    //    AplicarFiltro();
-    //    informacion.DataSource = dt;
-    //    informacion.DataBind();
-    //}
-
-    /**
-     * Pre:---
-     * Post: Filtrar por datos que quiere filtrar con DataView.
-     * Se cambia los datos que estan en la DataTable por los datos filtrados.
-     *
-     */
-    private void AplicarFiltro()
+    protected void btnFiltrar(object sender, EventArgs e)
     {
         string fNombre = filtrarNombre.Text;
         string lEstado = listaEstados.SelectedValue;
-        dv = new DataView(dt);
-        if (!string.IsNullOrEmpty(fNombre) && !string.IsNullOrEmpty(lEstado))
-        {
-            dv.RowFilter = $"nombre LIKE '%{fNombre}%' AND estado LIKE '{lEstado}'";
-        }
-        else if (!string.IsNullOrEmpty(fNombre))
-        {
-            dv.RowFilter = $"nombre LIKE '%{fNombre}%'";
-        }
-        else if (!string.IsNullOrEmpty(lEstado))
-        {
-            dv.RowFilter = $"estado LIKE '{lEstado}'";
-        }
-        else
-        {
-            // Si no hay filtro, muestra todos los datos
-            dv.RowFilter = "";
-        }
-        dt = dv.ToTable();
+        if (!string.IsNullOrEmpty(fNombre)) filtroNombre(fNombre);
+        if (!string.IsNullOrEmpty(lEstado)) filtroEstado(lEstado);
+        if (!string.IsNullOrEmpty(importeMax.Text) | !string.IsNullOrEmpty(importeMin.Text)) filtroImporte(importeMin.Text, importeMax.Text);
+    }
+
+    private void filtroImporte(string iMin, string iMax)
+    {
+        decimal.TryParse(iMin, out decimal importeMin);
+        decimal.TryParse(iMax, out decimal importeMax);
+        DataTable tFiltro = new DataTable();
+        SqlDataAdapter da = new SqlDataAdapter($"select * from facturas Where importe < @importeMax and importe > @importeMin", con);
+        da.SelectCommand.Parameters.AddWithValue("@importeMax", importeMax);
+        da.SelectCommand.Parameters.AddWithValue("@importeMin", importeMin);
+        da.Fill(tFiltro);
+        BindData(tFiltro);
+    }
+
+    private void filtroEstado(string lEstado)
+    {
+        DataTable tFiltro = new DataTable();
+        SqlDataAdapter da = new SqlDataAdapter($"select * from facturas Where estado like @lEstado", con);
+        da.SelectCommand.Parameters.AddWithValue("@lEstado", $"%{lEstado}");
+        da.Fill(tFiltro);
+        BindData(tFiltro);
+    }
+
+        private void filtroNombre(string fNombre)
+    {
+        DataTable tFiltro = new DataTable();
+        SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM facturas WHERE nombre LIKE @fNombre", con);
+        da.SelectCommand.Parameters.AddWithValue("@fNombre", $"%{fNombre}%");
+        da.Fill(tFiltro);
+        BindData(tFiltro);
     }
 
     /**
@@ -121,18 +97,19 @@ public partial class Facturas : System.Web.UI.Page
      */
     protected void btnCommit(object sender, EventArgs e)
     {
+
     }
 
     protected void informacion_RowEditing(object sender, GridViewEditEventArgs e)
     {
         informacion.EditIndex = e.NewEditIndex;
-        BindData();
+        BindData(dt);
     }
 
     protected void informacion_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
     {
         informacion.EditIndex = -1;
-        BindData();
+        BindData(dt);
     }
 
     protected void informacion_RowUpdating(object sender, GridViewUpdateEventArgs e)
@@ -146,12 +123,11 @@ public partial class Facturas : System.Web.UI.Page
             dr["importe"] = ((TextBox)(row.Cells[10].Controls[0])).Text;
         }
         informacion.EditIndex = -1;
-        BindData();
     }
 
-    private void BindData()
+    private void BindData(DataTable newTable)
     {
-        informacion.DataSource = dt;
+        informacion.DataSource = newTable;
         informacion.DataBind();
     }
 }
