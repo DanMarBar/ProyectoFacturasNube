@@ -114,15 +114,15 @@ public partial class Facturas : System.Web.UI.Page
 
     protected void informacion_RowUpdating(object sender, GridViewUpdateEventArgs e)
     {
-        SqlDataAdapter da = new SqlDataAdapter((string)ViewState["update"], con);
-        SqlCommandBuilder db = new SqlCommandBuilder(da);
-        DataSet ds = (DataSet)ViewState["dataset"];
-        if (ds.Tables["facturas"].Rows.Count > 0) {
-            GridViewRow row = informacion.Rows[e.RowIndex];
-            DataRow dr = ds.Tables["facturas"].Rows[0];
-            dr["importe"] = ((TextBox)(row.Cells[10].Controls[0])).Text;
-        }
+        Label codFactura = informacion.Rows[e.RowIndex].FindControl("numeroFactura") as Label;
+        TextBox nombre = informacion.Rows[e.RowIndex].FindControl("txt_nombre") as TextBox;
+        TextBox apellidos = informacion.Rows[e.RowIndex].FindControl("txt_apellidos") as TextBox;
+        SqlCommand cmd = new SqlCommand($"UPDATE facturas set nombre = '{nombre.Text}', apellidos = '{apellidos.Text}' where numeroFactura = '{codFactura.Text}'",con);
+        con.Open();
+        cmd.ExecuteNonQuery();
+        con.Close();
         informacion.EditIndex = -1;
+        BindData(dt);
     }
 
     private void BindData(DataTable newTable)

@@ -38,9 +38,9 @@
         <asp:Label ID="nombreLabel" runat="server" Text="Nombre: " class="m-2 p-2"></asp:Label>
         <asp:TextBox ID="filtrarNombre" runat="server" type="text" class="m-2"></asp:TextBox><br />
         <asp:Label ID="importeMinLabel" runat="server" Text=" Importe Mínimo: " class="m-2 p-2"></asp:Label>
-        <asp:TextBox ID="importeMin" runat="server"  class="m-2"><ItemStyle HorizontalAlign="right" /></asp:TextBox>
+        <asp:TextBox ID="importeMin" runat="server"  class="m-2 text-end"></asp:TextBox>
         <asp:Label ID="importeMaxLabel" runat="server" Text=" Importe Máximo: " class="m-2 p-2"></asp:Label>
-        <asp:TextBox ID="importeMax" runat="server"  class="m-2"><ItemStyle HorizontalAlign="right" /></asp:TextBox>
+        <asp:TextBox ID="importeMax" runat="server"  class="m-2 text-end"></asp:TextBox>
         <asp:Button ID="filtrar" runat="server" Text="Filtrar" OnClick="btnFiltrar" class="m-2"/>
         <asp:Button ID="restablecer" runat="server" Text="Restablecer" OnClick="Reload_Table" class="m-2" />
         <div>
@@ -51,10 +51,35 @@
                         >
                 <AlternatingRowStyle BackColor="White" />
                 <Columns>
-                    <asp:BoundField DataField="numeroFactura" HeaderText="Cod. Factura" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
+                    <asp:TemplateField HeaderText="Cod. Factura">  
+                        <ItemStyle HorizontalAlign="left"/>
+                        <ItemTemplate>  
+                            <asp:Label ID="numeroFactura" runat="server" Text='<%#Eval("numeroFactura") %>'></asp:Label> 
+                        </ItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Fecha Factura">
+                        <ItemStyle HorizontalAlign="center"/> 
+                        <ItemTemplate>  
+                            <asp:Label ID="fechaFactura" runat="server" Text='<%#Eval("fechaFactura") %>'></asp:Label>  
+                        </ItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Nombre de Cliente">  
+                        <ItemTemplate>  
+                            <asp:Label ID="nombre" runat="server" Text='<%#Eval("nombre") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_nombre" runat="server" Text='<%#Eval("nombre") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Nombre de Cliente">  
+                        <ItemTemplate>  
+                            <asp:Label ID="apellidos" runat="server" Text='<%#Eval("apellidos") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_apellidos" runat="server" Text='<%#Eval("apellidos") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField> 
                     <asp:BoundField DataField="fechaFactura" HeaderText="Fecha Factura" DataFormatString="{0:dd/MM/yyyy}"><ItemStyle HorizontalAlign="center" /> </asp:BoundField>
-                    <asp:BoundField DataField="nombre" HeaderText="Nombre de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="apellidos" HeaderText="Apellidos de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
                     <asp:BoundField DataField="servicio" HeaderText="Servicio" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
                     <asp:BoundField DataField="CIFCliente" HeaderText="CIF de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
                     <asp:BoundField DataField="direccion" HeaderText="Direccion" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
