@@ -22,9 +22,9 @@
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
     <form id="form1" runat="server">
-        <asp:Label ID="Label1" runat="server" Text="Estado de factura: " class="m-2 p-2" ></asp:Label>
+        <asp:Label ID="estadoLabel" runat="server" Text="Estado de factura: " class="m-2 p-2" ></asp:Label>
         <asp:DropDownList ID="listaEstados" runat="server" class="m-2">
-            <asp:ListItem Value=""></asp:ListItem>
+            <asp:ListItem Value="">Seleccionar un Estado</asp:ListItem>
             <asp:ListItem Value="Rechazada">Rechazada</asp:ListItem>
             <asp:ListItem Value="Registrada">Registrada</asp:ListItem>
             <asp:ListItem Value="Cobrada">Cobrada</asp:ListItem>
@@ -60,10 +60,11 @@
                     <asp:TemplateField HeaderText="Fecha Factura">
                         <ItemStyle HorizontalAlign="center"/> 
                         <ItemTemplate>  
-                            <asp:Label ID="fechaFactura" runat="server" Text='<%#Eval("fechaFactura") %>'></asp:Label>  
+                            <asp:Label ID="fechaFactura" runat="server" Text='<%# Bind("fechaFactura", "{0:dd/MM/yyyy}") %>'></asp:Label>  
                         </ItemTemplate>  
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="Nombre de Cliente">  
+                    <asp:TemplateField HeaderText="Nombre de Cliente"> 
+                        <ItemStyle HorizontalAlign="left" />
                         <ItemTemplate>  
                             <asp:Label ID="nombre" runat="server" Text='<%#Eval("nombre") %>'></asp:Label>  
                         </ItemTemplate>  
@@ -71,7 +72,8 @@
                             <asp:TextBox ID="txt_nombre" runat="server" Text='<%#Eval("nombre") %>'></asp:TextBox>  
                         </EditItemTemplate>  
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="Nombre de Cliente">  
+                    <asp:TemplateField HeaderText="Apellidos de Cliente">  
+                        <ItemStyle HorizontalAlign="left" />
                         <ItemTemplate>  
                             <asp:Label ID="apellidos" runat="server" Text='<%#Eval("apellidos") %>'></asp:Label>  
                         </ItemTemplate>  
@@ -79,17 +81,98 @@
                             <asp:TextBox ID="txt_apellidos" runat="server" Text='<%#Eval("apellidos") %>'></asp:TextBox>  
                         </EditItemTemplate>  
                     </asp:TemplateField> 
-                    <asp:BoundField DataField="fechaFactura" HeaderText="Fecha Factura" DataFormatString="{0:dd/MM/yyyy}"><ItemStyle HorizontalAlign="center" /> </asp:BoundField>
-                    <asp:BoundField DataField="servicio" HeaderText="Servicio" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="CIFCliente" HeaderText="CIF de Cliente" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="direccion" HeaderText="Direccion" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="ciudad" HeaderText="Ciudad" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="codPostal" HeaderText="Cod. Postal" ><ItemStyle HorizontalAlign="right" /> </asp:BoundField>
-                    <asp:BoundField DataField="importe" HeaderText="Importe de Factura" ><ItemStyle HorizontalAlign="right" /> </asp:BoundField>
-                    <asp:BoundField DataField="importeIVA" HeaderText="ImporteIVA de Factura" ><ItemStyle HorizontalAlign="right" /> </asp:BoundField>
-                    <asp:BoundField DataField="moneda" HeaderText="Moneda" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="estado" HeaderText="Estado de Factura" ><ItemStyle HorizontalAlign="left" /> </asp:BoundField>
-                    <asp:BoundField DataField="fechaCobro" HeaderText="Fecha cobro de Factura" DataFormatString="{0:dd/MM/yyyy}" ><ItemStyle HorizontalAlign="center" /> </asp:BoundField>
+                    <asp:TemplateField HeaderText="Servicio">
+                        <ItemStyle HorizontalAlign="left" />
+                        <ItemTemplate>  
+                            <asp:Label ID="servicio" runat="server" Text='<%#Eval("servicio") %>'></asp:Label>  
+                        </ItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="CIF de Cliente">  
+                        <ItemStyle HorizontalAlign="left" />
+                        <ItemTemplate>  
+                            <asp:Label ID="CIFCliente" runat="server" Text='<%#Eval("CIFCliente") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_cif" runat="server" Text='<%#Eval("CIFCliente") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField> 
+                    <asp:TemplateField HeaderText="Direccion">  
+                        <ItemStyle HorizontalAlign="left" />
+                        <ItemTemplate>  
+                            <asp:Label ID="direccion" runat="server" Text='<%#Eval("direccion") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_direccion" runat="server" Text='<%#Eval("direccion") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField> 
+                    <asp:TemplateField HeaderText="Ciudad">  
+                        <ItemStyle HorizontalAlign="left" />
+                        <ItemTemplate>  
+                            <asp:Label ID="ciudad" runat="server" Text='<%#Eval("ciudad") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_ciudad" runat="server" Text='<%#Eval("ciudad") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Cod. Postal">  
+                        <ItemStyle HorizontalAlign="right" />
+                        <ItemTemplate>  
+                            <asp:Label ID="codPostal" runat="server" Text='<%#Eval("codPostal") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_codPostal" runat="server" Text='<%#Eval("codPostal") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Importe de Factura">  
+                        <ItemStyle HorizontalAlign="right" />
+                        <ItemTemplate>  
+                            <asp:Label ID="importe" runat="server" Text='<%#Eval("importe") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_importe" runat="server" Text='<%#Eval("importe") %>'></asp:TextBox>  
+                        </EditItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="ImporteIVA de Factura">  
+                        <ItemStyle HorizontalAlign="right" />
+                        <ItemTemplate>  
+                            <asp:Label ID="importeIVA" runat="server" Text='<%#Eval("importeIVA") %>'></asp:Label>  
+                        </ItemTemplate> 
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Moneda">  
+                        <ItemStyle HorizontalAlign="left" />
+                        <ItemTemplate>  
+                            <asp:Label ID="moneda" runat="server" Text='<%#Eval("moneda") %>'></asp:Label>  
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Estado de Factura">  
+                        <ItemStyle HorizontalAlign="left" />
+                        <ItemTemplate>  
+                            <asp:Label ID="estado" runat="server" Text='<%#Eval("estado") %>'></asp:Label>  
+                        </ItemTemplate>  
+                        <EditItemTemplate>  
+                            <asp:DropDownList ID="txt_estados" runat="server">
+                                <asp:ListItem Value="">Seleccionar un Estado</asp:ListItem>
+                                <asp:ListItem Value="Rechazada">Rechazada</asp:ListItem>
+                                <asp:ListItem Value="Registrada">Registrada</asp:ListItem>
+                                <asp:ListItem Value="Cobrada">Cobrada</asp:ListItem>
+                                <asp:ListItem Value="Emitida">Emitida</asp:ListItem>
+                                <asp:ListItem Value="Anulada">Anulada</asp:ListItem>
+                                <asp:ListItem Value="Aceptada">Aceptada</asp:ListItem>
+                                <asp:ListItem Value="Reenviada">Reenviada</asp:ListItem>
+                                <asp:ListItem Value="Anulación aceptada">Anulación aceptada</asp:ListItem>
+                                <asp:ListItem Value="Solicitada anulación">Solicitada anulación</asp:ListItem>
+                            </asp:DropDownList>
+                        </EditItemTemplate>  
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Fecha cobro de Factura">
+                        <ItemStyle HorizontalAlign="center"/> 
+                        <ItemTemplate>  
+                            <asp:Label ID="fechaCobro" runat="server" Text='<%# Bind("fechaCobro", "{0:dd/MM/yyyy}") %>'></asp:Label>  
+                        </ItemTemplate>
+                        <EditItemTemplate>  
+                            <asp:TextBox ID="txt_fechaCobro" runat="server" Text='<%# Bind("fechaCobro", "{0:dd/MM/yyyy}") %>'></asp:TextBox>  
+                        </EditItemTemplate>
+                    </asp:TemplateField>
                     <asp:CommandField ShowEditButton="True"/>                
                 </Columns>
                 <FooterStyle BackColor="#CCCC99" />
@@ -102,7 +185,6 @@
                 <SortedDescendingCellStyle BackColor="#EAEAD3" />
                 <SortedDescendingHeaderStyle BackColor="#575357" />
             </asp:GridView>
-            <asp:Button ID="commit" runat="server" OnClick="btnCommit" Text="Commit a BBDD"/>
         </div>
     </form>
 </body>
