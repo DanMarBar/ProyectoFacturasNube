@@ -37,7 +37,9 @@ public partial class Facturas : System.Web.UI.Page
     /**
      * Pre:---
      * Post: elimina los filtros escritos
-     *
+     * 
+     * @Author: Daniel Martinez
+     * @Date: 19-11-2023
      */
     private void LimpiarFiltros()
     {
@@ -50,7 +52,9 @@ public partial class Facturas : System.Web.UI.Page
     /**
      * Pre:---
      * Post: Después de hacer clic en el botón Restablecer, el filtro se borrará y el GridView volverá a su estado inicial.
-     *
+     * 
+     * @Author: Hongbin Ruan
+     * @Date: 18-11-2023
      */
     protected void Reload_Table(object sender, EventArgs e)
     {
@@ -66,10 +70,12 @@ public partial class Facturas : System.Web.UI.Page
 
     /**
      * Pre:---
-     * Post: Después de pulsar el botón Filtrar
-     * Filtrar los datos de la DataTable dt,
-     * y en otra DataTable filtertable y mostrarla mediante BindData().
-     *
+     * Post: Después de hacer clic en el botón Restablecer, el filtro se borrará y el GridView volverá a su estado inicial.
+     * Es en donde se ejecutan los filtros, los cuales se añaden a una lista, la cual al final los usara para la Query. Se
+     * preveen errores a la hora de la insercion de los parametros por parte del usuario. 
+     * 
+     * @Author: Hongbin Ruan
+     * @Date: 18-11-2023
      */
     protected void btnFiltrar(object sender, EventArgs e)
     {
@@ -127,7 +133,9 @@ public partial class Facturas : System.Web.UI.Page
     /**
      * Pre:---
      * Post: Obtener el row que quires editar.
-     *
+     * 
+     * @Author: Hongbin Ruan
+     * @Date: 18-11-2023
      */
     protected void informacion_RowEditing(object sender, GridViewEditEventArgs e)
     {
@@ -138,8 +146,10 @@ public partial class Facturas : System.Web.UI.Page
 
     /**
      * Pre:---
-     * Post: Anulación de la modificación
+     * Post: Anulación de la insercion de los datos para realizar el update
      *
+     * @Author: Hongbin Ruan
+     * @Date: 18-11-2023
      */
     protected void informacion_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
     {
@@ -150,8 +160,12 @@ public partial class Facturas : System.Web.UI.Page
     /**
      * Pre:---
      * Post: Obtención de información actualizada, actualización de la información de la base de datos 
-     * y recuperación de la información actualizada de la base de datos.
+     * y recuperación de la información actualizada de la base de datos. Transforma los datos que sean
+     * necesarios y los actualiza. Se prevee que el usuario introduzca algun caracter invalido y la 
+     * sitacion esta controlada
      * 
+     * @Author: Hongbin Ruan
+     * @Date: 18-11-2023
      */
     protected void informacion_RowUpdating(object sender, GridViewUpdateEventArgs e)
     {
@@ -224,6 +238,16 @@ public partial class Facturas : System.Web.UI.Page
         }
     }
 
+    /**
+     * Pre: ---
+     * Post: Se encarga de cambiar el color de fondo de la fila que se está editando 
+     * a un tono PaleVioletRed para destacarla. Además, ajusta el valor seleccionado 
+     * en un DropDownList dentro de la fila en edición, basándose en el estado actual 
+     * de esa fila.
+     * 
+     * @Author: Daniel Martinez
+     * @Date: 19-11-2023
+     */
     protected void informacion_RowDataBound(object sender, GridViewRowEventArgs e)
     {
         if (e.Row.RowType == DataControlRowType.DataRow)
@@ -245,6 +269,9 @@ public partial class Facturas : System.Web.UI.Page
      * Pre:---
      * Post: Visualización de datos de la DataTable
      * 
+     * @Params newTable la tabla a ser visualizada
+     * @Author: Hongbin Ruan
+     * @Date: 18-11-2023
      */
     private void BindData(DataTable newTable)
     {
