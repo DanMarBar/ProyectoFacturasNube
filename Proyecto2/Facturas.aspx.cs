@@ -8,6 +8,7 @@ using System.Web.UI.WebControls;
 using System.Data;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Globalization;
 
 public partial class Facturas : System.Web.UI.Page
 {
@@ -23,7 +24,6 @@ public partial class Facturas : System.Web.UI.Page
      * y la muestra mediante BindData().
      *
      */
-
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!IsPostBack)
@@ -36,16 +36,32 @@ public partial class Facturas : System.Web.UI.Page
 
     /**
      * Pre:---
+     * Post: elimina los filtros escritos
+     *
+     */
+    private void LimpiarFiltros()
+    {
+        filtrarNombre.Text = String.Empty;
+        importeMin.Text = String.Empty;
+        importeMax.Text = String.Empty;
+        listaEstados.SelectedIndex = 0; 
+    }
+
+    /**
+     * Pre:---
      * Post: Después de hacer clic en el botón Restablecer, el filtro se borrará y el GridView volverá a su estado inicial.
      *
      */
     protected void Reload_Table(object sender, EventArgs e)
     {
-        filtrotable = dt;
         dt = new DataTable();
         SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
         da.Fill(dt);
+        filtrotable = new DataTable();
+        filtrotable = dt.Copy(); 
         BindData(dt);
+        lblError.Text = "";
+        LimpiarFiltros();
     }
 
     /**
@@ -57,38 +73,55 @@ public partial class Facturas : System.Web.UI.Page
      */
     protected void btnFiltrar(object sender, EventArgs e)
     {
-        decimal.TryParse(importeMin.Text, out decimal iMin);
-        decimal.TryParse(importeMax.Text, out decimal iMax);
-        DataView dataView = new DataView(dt);
-        if (!string.IsNullOrEmpty(filtrarNombre.Text) && dt.Columns.Contains("nombre"))
+        try
         {
-            filtros.Add($"nombre like '%{filtrarNombre.Text}%'");
-        }
+            decimal.TryParse(importeMin.Text, out decimal iMin);
+            decimal.TryParse(importeMax.Text, out decimal iMax);
+            DataView dataView = new DataView(dt);
+            filtros.Clear();
 
-        if (!string.IsNullOrEmpty(listaEstados.SelectedValue) && dt.Columns.Contains("estado"))
-        {
-            filtros.Add($"estado like '%{listaEstados.SelectedValue}%'");
-        }
-
-        if (dt.Columns.Contains("importe") && (iMin != 0 & iMax != 0))
-        { 
-            filtros.Add($"importe >= {iMin} AND importe <= {iMax}");
-        } 
-        else if (dt.Columns.Contains("importe") && (iMin != 0))
-        {
-            filtros.Add($"importe >= {iMin} ");
-        }
-        else if (dt.Columns.Contains("importe") && (iMax != 0))
+            if (!string.IsNullOrEmpty(filtrarNombre.Text) && dt.Columns.Contains("nombre"))
             {
-            filtros.Add($"importe <= {iMax}");
-        }
+                filtros.Add($"nombre like '%{filtrarNombre.Text}%'");
+            }
 
-        if (filtros.Count > 0)
-        {
-            dataView.RowFilter = string.Join(" AND ", filtros);
+            if (!string.IsNullOrEmpty(listaEstados.SelectedValue) && dt.Columns.Contains("estado"))
+            {
+                filtros.Add($"estado like '%{listaEstados.SelectedValue}%'");
+            }
+
+            if (dt.Columns.Contains("importe") && (iMin != 0 & iMax != 0))
+            {
+                filtros.Add($"importe >= {iMin} AND importe <= {iMax}");
+            }
+            else if (dt.Columns.Contains("importe") && (iMin != 0))
+            {
+                filtros.Add($"importe >= {iMin}");
+            }
+            else if (dt.Columns.Contains("importe") && (iMax != 0))
+            {
+                filtros.Add($"importe <= {iMax}");
+            }
+
+            if (filtros.Count > 0)
+            {
+                dataView.RowFilter = string.Join(" AND ", filtros);
+            }
+
+            filtrotable = dataView.ToTable();
+            BindData(filtrotable);
+            lblError.Text = "";
         }
-        filtrotable = dataView.ToTable();
-        BindData(filtrotable);
+        catch (System.Data.SyntaxErrorException ex)
+        {
+            lblError.Text = "Error al aplicar el filtro. Por favor, revisa los criterios de búsqueda.";
+            System.Diagnostics.Debug.WriteLine("Error al filtrar: " + ex.Message);
+        }
+        catch (Exception ex)
+        {
+            lblError.Text = "Error mayor";
+            System.Diagnostics.Debug.WriteLine("Error al filtrar: " + ex.Message);
+        }
     }
 
     /**
@@ -122,24 +155,33 @@ public partial class Facturas : System.Web.UI.Page
      */
     protected void informacion_RowUpdating(object sender, GridViewUpdateEventArgs e)
     {
-        Label codFactura = informacion.Rows[e.RowIndex].FindControl("numeroFactura") as Label;
-        TextBox nombre = informacion.Rows[e.RowIndex].FindControl("txt_nombre") as TextBox;
-        TextBox apellidos = informacion.Rows[e.RowIndex].FindControl("txt_apellidos") as TextBox;
-        TextBox CIF = informacion.Rows[e.RowIndex].FindControl("txt_cif") as TextBox;
-        TextBox direccion = informacion.Rows[e.RowIndex].FindControl("txt_direccion") as TextBox;
-        TextBox ciudad = informacion.Rows[e.RowIndex].FindControl("txt_ciudad") as TextBox;
-        TextBox codPostal = informacion.Rows[e.RowIndex].FindControl("txt_codPostal") as TextBox;
-        TextBox importe = informacion.Rows[e.RowIndex].FindControl("txt_importe") as TextBox;
-        TextBox fechaCobro = informacion.Rows[e.RowIndex].FindControl("txt_fechaCobro") as TextBox;
-        DropDownList estado = informacion.Rows[e.RowIndex].FindControl("txt_estados") as DropDownList;
-        int codPostalValue;
-        decimal importeValue;
-        int.TryParse(codPostal.Text, out codPostalValue);
-        decimal.TryParse(importe.Text, out importeValue);
-        con.Open();
-        string query = "UPDATE facturas SET nombre = @Nombre, apellidos = @Apellidos, CIFCliente = @CIF, direccion = @Direccion, ciudad = @Ciudad, codPostal = @CodPostal," +
-            " importe = @Importe, fechaCobro = @FechaCobro, estado = @Estado WHERE numeroFactura = @CodigoFactura";
-        SqlCommand command = new SqlCommand(query, con);
+        try
+        {
+            Label codFactura = informacion.Rows[e.RowIndex].FindControl("numeroFactura") as Label;
+            TextBox nombre = informacion.Rows[e.RowIndex].FindControl("txt_nombre") as TextBox;
+            TextBox apellidos = informacion.Rows[e.RowIndex].FindControl("txt_apellidos") as TextBox;
+            TextBox CIF = informacion.Rows[e.RowIndex].FindControl("txt_cif") as TextBox;
+            TextBox direccion = informacion.Rows[e.RowIndex].FindControl("txt_direccion") as TextBox;
+            TextBox ciudad = informacion.Rows[e.RowIndex].FindControl("txt_ciudad") as TextBox;
+            TextBox codPostal = informacion.Rows[e.RowIndex].FindControl("txt_codPostal") as TextBox;
+            TextBox importe = informacion.Rows[e.RowIndex].FindControl("txt_importe") as TextBox;
+            TextBox fechaCobro = informacion.Rows[e.RowIndex].FindControl("txt_fechaCobro") as TextBox;
+            DropDownList estado = informacion.Rows[e.RowIndex].FindControl("txt_estados") as DropDownList;
+            int codPostalValue;
+            decimal importeValue;
+            int.TryParse(codPostal.Text, out codPostalValue);
+            decimal.TryParse(importe.Text, out importeValue);
+            string fechaCobroString = fechaCobro.Text.Trim();
+            DateTime fechaCobroValue;
+            if (DateTime.TryParseExact(fechaCobroString, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaCobroValue))
+            {
+                string fechaFormateada = fechaCobroValue.ToString("MM/dd/yyyy");
+                fechaCobro.Text = fechaFormateada;
+            }
+            con.Open();
+            string query = "UPDATE facturas SET nombre = @Nombre, apellidos = @Apellidos, CIFCliente = @CIF, direccion = @Direccion, ciudad = @Ciudad, codPostal = @CodPostal," +
+                " importe = @Importe, fechaCobro = @FechaCobro, estado = @Estado WHERE numeroFactura = @CodigoFactura";
+            SqlCommand command = new SqlCommand(query, con);
             command.Parameters.AddWithValue("@Nombre", nombre.Text);
             command.Parameters.AddWithValue("@Apellidos", apellidos.Text);
             command.Parameters.AddWithValue("@CIF", CIF.Text);
@@ -150,21 +192,53 @@ public partial class Facturas : System.Web.UI.Page
             command.Parameters.AddWithValue("@FechaCobro", fechaCobro.Text);
             command.Parameters.AddWithValue("@Estado", estado.SelectedValue);
             command.Parameters.AddWithValue("@CodigoFactura", codFactura.Text);
-        command.ExecuteNonQuery();
-        con.Close();
-        SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
-        dt = new DataTable();
-        da.Fill(dt);
-        informacion.EditIndex = -1;
-        if (filtros.Count > 0)
+            command.ExecuteNonQuery();
+            con.Close();
+            SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
+            dt = new DataTable();
+            da.Fill(dt);
+            informacion.EditIndex = -1;
+            if (filtros.Count > 0)
+            {
+                DataView dv = new DataView(dt);
+                dv.RowFilter = string.Join(" AND ", filtros);
+                filtrotable = dv.ToTable();
+                filtros.Clear();
+                BindData(filtrotable);
+            }
+            else BindData(dt);
+            lblError.Text = "";
+        }
+        catch (System.Data.SqlClient.SqlException ex)
         {
-            DataView dv = new DataView(dt);
-            dv.RowFilter = string.Join(" AND ", filtros);
-            filtrotable = dv.ToTable();
-            filtros.Clear();
-            BindData( filtrotable );
-            
-        } else BindData(dt);
+            System.Diagnostics.Debug.WriteLine("SQL Error: " + ex.Message);
+            lblError.Text = "Error al actualizar la base de datos SQL Error: " + ex.Message;
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            System.Diagnostics.Debug.WriteLine("InvalidOperationException: " + ex.Message);
+        }
+        finally
+        {
+            con.Close();
+        }
+    }
+
+    protected void informacion_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            if (e.Row.RowIndex == informacion.EditIndex)
+            {
+                e.Row.BackColor = System.Drawing.Color.PaleVioletRed; 
+            }
+            if ((e.Row.RowState & DataControlRowState.Edit) > 0)
+            {
+                DropDownList ddl = (DropDownList)e.Row.FindControl("txt_estados");
+                string estadoActual = DataBinder.Eval(e.Row.DataItem, "estado").ToString();
+                ddl.SelectedValue = estadoActual;
+            }
+        }
     }
 
     /**
