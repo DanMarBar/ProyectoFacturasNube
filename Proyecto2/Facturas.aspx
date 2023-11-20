@@ -87,16 +87,9 @@
                     <asp:Label ID="estadoLabel" runat="server" Text="Estado factura: " class="p-2" ></asp:Label>
                     <asp:DropDownList ID="listaEstados" runat="server" class="form-control d-inline-block align-middle" style="width: auto; vertical-align: top;" >
                         <asp:ListItem Value="">Seleccionar un Estado</asp:ListItem>
-                        <asp:ListItem Value="Rechazada">Rechazada</asp:ListItem>
-                        <asp:ListItem Value="Registrada">Registrada</asp:ListItem>
-                        <asp:ListItem Value="Pendiente">Pendiente</asp:ListItem>
-                        <asp:ListItem Value="Cobrada">Cobrada</asp:ListItem>
-                        <asp:ListItem Value="Emitida">Emitida</asp:ListItem>
-                        <asp:ListItem Value="Anulada">Anulada</asp:ListItem>
-                        <asp:ListItem Value="Aceptada">Aceptada</asp:ListItem>
-                        <asp:ListItem Value="Reenviada">Reenviada</asp:ListItem>
-                        <asp:ListItem Value="Anulación aceptada">Anulación aceptada</asp:ListItem>
-                        <asp:ListItem Value="Solicitada anulación">Solicitada anulación</asp:ListItem>
+                            <asp:ListItem Value="Pendiente">Pendiente</asp:ListItem>
+                            <asp:ListItem Value="Cobrada">Cobrada</asp:ListItem>
+                            <asp:ListItem Value="Anulada">Anulada</asp:ListItem>
                     </asp:DropDownList>
                 </div>
             </div>
@@ -224,16 +217,9 @@
                             </ItemTemplate>  
                             <EditItemTemplate>  
                                 <asp:DropDownList ID="txt_estados" runat="server"  CssClass="form-control">
-                                    <asp:ListItem Value="Rechazada">Rechazada</asp:ListItem>
-                                    <asp:ListItem Value="Registrada">Registrada</asp:ListItem>
                                     <asp:ListItem Value="Pendiente">Pendiente</asp:ListItem>
                                     <asp:ListItem Value="Cobrada">Cobrada</asp:ListItem>
-                                    <asp:ListItem Value="Emitida">Emitida</asp:ListItem>
                                     <asp:ListItem Value="Anulada">Anulada</asp:ListItem>
-                                    <asp:ListItem Value="Aceptada">Aceptada</asp:ListItem>
-                                    <asp:ListItem Value="Reenviada">Reenviada</asp:ListItem>
-                                    <asp:ListItem Value="Anulación aceptada">Anulación aceptada</asp:ListItem>
-                                    <asp:ListItem Value="Solicitada anulación">Solicitada anulación</asp:ListItem>
                                 </asp:DropDownList>
                             </EditItemTemplate>  
                         </asp:TemplateField>

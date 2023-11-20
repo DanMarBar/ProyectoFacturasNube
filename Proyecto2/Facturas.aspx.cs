@@ -207,6 +207,7 @@ public partial class Facturas : System.Web.UI.Page
             command.Parameters.AddWithValue("@Estado", estado.SelectedValue);
             command.Parameters.AddWithValue("@CodigoFactura", codFactura.Text);
             command.ExecuteNonQuery();
+
             con.Close();
             SqlDataAdapter da = new SqlDataAdapter("select * from facturas", con);
             dt = new DataTable();
@@ -232,6 +233,10 @@ public partial class Facturas : System.Web.UI.Page
         {
             System.Diagnostics.Debug.WriteLine("InvalidOperationException: " + ex.Message);
         }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine("Error: " + ex.Message);
+        }
         finally
         {
             con.Close();
@@ -254,13 +259,19 @@ public partial class Facturas : System.Web.UI.Page
         {
             if (e.Row.RowIndex == informacion.EditIndex)
             {
-                e.Row.BackColor = System.Drawing.Color.PaleVioletRed; 
+                e.Row.BackColor = System.Drawing.Color.PaleVioletRed;
             }
             if ((e.Row.RowState & DataControlRowState.Edit) > 0)
             {
                 DropDownList ddl = (DropDownList)e.Row.FindControl("txt_estados");
                 string estadoActual = DataBinder.Eval(e.Row.DataItem, "estado").ToString();
                 ddl.SelectedValue = estadoActual;
+            }
+            string estado = DataBinder.Eval(e.Row.DataItem, "estado").ToString();
+            LinkButton lnkEdit = (LinkButton)e.Row.FindControl("lnkEdit");
+            if (estado != "Pendiente" && lnkEdit != null)
+            {
+                lnkEdit.Visible = false;
             }
         }
     }
